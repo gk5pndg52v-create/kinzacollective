@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KINZA Client Pipeline Automation Map</title>
+<style>
+  :root {
+    --navy: #1e1c32;
+    --gold: #caa03a;
+    --body: #292929;
+    --paper: #fbf7f3;
+    --rose: #af7373;
+    --green: #3b6d11;
+    --green-bg: #eaf3de;
+    --amber: #854f0b;
+    --amber-bg: #faeeda;
+    --red: #791f1f;
+    --red-bg: #fcebeb;
+    --clickup-bg: #e1f5ee; --clickup-text: #085041;
+    --zapier-bg: #eeedfe; --zapier-text: #3c3489;
+    --make-bg: #faece7; --make-text: #712b13;
+    --manual-bg: #f1efe8; --manual-text: #444441;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
+    background: var(--paper);
+    color: var(--body);
+    margin: 0;
+    padding: 32px 20px 80px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  h1 {
+    font-family: 'Cinzel', Georgia, serif;
+    color: var(--gold);
+    font-size: 26px;
+    letter-spacing: 0.02em;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    color: #5a5a5a;
+    font-size: 14px;
+    margin: 0 0 28px;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background: #fff;
+    border: 1px solid #e5ddc9;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    font-size: 13px;
+  }
+  .legend-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .legend-label { font-weight: 600; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 4px; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge.clickup { background: var(--clickup-bg); color: var(--clickup-text); }
+  .badge.zapier { background: var(--zapier-bg); color: var(--zapier-text); }
+  .badge.make { background: var(--make-bg); color: var(--make-text); }
+  .badge.manual { background: var(--manual-bg); color: var(--manual-text); }
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .status-dot.built { background: var(--green); }
+  .status-dot.pending { background: var(--amber); }
+  .status-dot.open { background: var(--red); }
+  .status-text { font-size: 12px; }
+
+  details.stage {
+    background: #fff;
+    border: 1px solid #e5ddc9;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  details.stage > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 14px 18px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--navy);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    background: #f8f5ee;
+  }
+  details.stage > summary::-webkit-details-marker { display: none; }
+  .chevron {
+    color: var(--gold);
+    transition: transform 0.15s ease;
+    display: inline-block;
+    justify-self: start;
+  }
+  details.stage[open] > summary .chevron { transform: rotate(90deg); }
+  .stage-title { justify-self: center; text-align: center; white-space: nowrap; }
+  .stage-meta { font-size: 12px; color: #999; font-weight: 400; justify-self: end; text-align: right; white-space: nowrap; }
+  .stage-body { padding: 6px 18px 16px; }
+
+  .step {
+    border-top: 1px solid #f0ebe0;
+    padding: 10px 0;
+  }
+  .step:first-child { border-top: none; }
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .step-name { font-size: 14px; font-weight: 600; flex: 1; }
+  .step-desc {
+    font-size: 13px;
+    color: #666;
+    margin: 4px 0 0 19px;
+  }
+  .config {
+    margin: 8px 0 0 19px;
+    background: var(--manual-bg);
+    border-left: 3px solid var(--navy);
+    border-radius: 0 6px 6px 0;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    font-family: 'SF Mono', Consolas, monospace;
+    color: #333;
+    display: none;
+  }
+  .step.expanded .config { display: block; }
+  .config-line { margin: 2px 0; }
+  .config-label { color: var(--gold); font-weight: 600; }
+  .toggle-hint { font-size: 11px; color: #aaa; margin-left: auto; white-space: nowrap; }
+
+  .side-triggers {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .side-card {
+    flex: 1;
+    min-width: 240px;
+    background: #fff;
+    border: 1px dashed var(--rose);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .side-card h3 { font-size: 14px; margin: 0 0 6px; color: var(--rose); }
+  .side-card p { font-size: 13px; color: #555; margin: 0; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Client Pipeline Automation Map</h1>
+  <p class="subtitle">Click a stage to expand it. Click any step to see exactly how it's built — reuse this structure when setting up automation for a new client type.</p>
+
+  <div class="legend">
+    <div class="legend-group">
+      <span class="legend-label">Platform</span>
+      <span class="badge clickup">ClickUp</span>
+      <span class="badge zapier">Zapier</span>
+      <span class="badge make">Make.com</span>
+      <span class="badge manual">Manual</span>
+    </div>
+    <div class="legend-group">
+      <span class="legend-label">Status</span>
+      <span class="status-dot built"></span><span class="status-text">Built</span>
+      <span class="status-dot pending"></span><span class="status-text">Pending decision</span>
+      <span class="status-dot open"></span><span class="status-text">Open item</span>
+    </div>
+  </div>
+
+  <!-- STAGE 1 -->
+  <details class="stage" open>
+    <summary><span class="chevron">▸</span><span class="stage-title">Qualified Lead</span><span class="stage-meta">3 steps · all built</span></summary>
+    <div class="stage-body">
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">Reach out to schedule a meeting</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Pipeline Stage → Qualified Lead</div>
+          <div class="config-line"><span class="config-label">Action:</span> Create subtask, due +1 day, assigned Founder/CEO (COO follows)</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">Day 3 reminder</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Date is 3 days after due date + Task Name contains "Reach out to schedule a meeting" + Status is not Complete</div>
+          <div class="config-line"><span class="config-label">Action:</span> Add comment tagging Cari + Jillian — "Reminder: schedule meeting or mark task as complete"</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">Day 5 reminder</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Same as Day 3, offset changed to 5 days</div>
+          <div class="config-line"><span class="config-label">Action:</span> Same comment, escalated wording — "Second reminder: schedule meeting or mark task as complete"</div>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- STAGE 2 -->
+  <details class="stage">
+    <summary><span class="chevron">▸</span><span class="stage-title">Proposal</span><span class="stage-meta">4 steps · all built</span></summary>
+    <div class="stage-body">
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">3 subtasks: DocuSign, NDA check, referral source</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Pipeline Stage → Proposal</div>
+          <div class="config-line"><span class="config-label">Action:</span> Create subtasks, due +1 day each, Founder/CEO. Referral source is a required field before proposal can send.</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">Manual template date fix</span>
+          <span class="badge manual">Manual</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Why manual:</span> ClickUp's date-remap feature never fires when an automation creates or updates a task — only on a direct human edit.</div>
+          <div class="config-line"><span class="config-label">Action:</span> Follow-up task tags a team member with a video showing how to manually reapply the template so due dates cascade correctly.</div>
+          <div class="config-line"><span class="config-label">Note:</span> This is a permanent step, not a bug to fix — same pattern repeats at Onboarding and Active.</div>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- STAGE 2A -->
+  <details class="stage">
+    <summary><span class="chevron">▸</span><span class="stage-title">Closed - Lost</span><span class="stage-meta">4 steps · 1 open, 2 pending</span></summary>
+    <div class="stage-body">
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">Log lost reason on the card</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Pipeline Stage → Closed - Lost</div>
+          <div class="config-line"><span class="config-label">Action:</span> Create subtask, same day, Founder/CEO</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot pending"></span>
+          <span class="step-name">Slack notification to team</span>
+          <span class="badge zapier">Zapier</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> ClickUp custom field "01. Pipeline Status" changed to Closed - Lost</div>
+          <div class="config-line"><span class="config-label">Action:</span> Post to Slack — free 2-step Zap, no paid tier needed</div>
+          <div class="config-line"><span class="config-label">Pending:</span> Real channel and message content — currently posting to a test channel</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot pending"></span>
+          <span class="step-name">Re-engagement reminder</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Custom field changed to Closed - Lost</div>
+          <div class="config-line"><span class="config-label">Action:</span> Create subtask "Re-engagement check-in," due 90 days out</div>
+          <div class="config-line"><span class="config-label">Pending:</span> Real interval length and task owner</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot open"></span>
+          <span class="step-name">Card archive timing</span>
+          <span class="badge manual">Undecided</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Open question:</span> Should this auto-move the card to Closed after 1 year, or create a subtask prompting a manual review instead?</div>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- STAGE 3 -->
+  <details class="stage">
+    <summary><span class="chevron">▸</span><span class="stage-title">Onboarding (Closed - Won)</span><span class="stage-meta">5 steps · 1 open</span></summary>
+    <div class="stage-body">
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">9-subtask Onboarding template</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Pipeline Stage → Closed - Won</div>
+          <div class="config-line"><span class="config-label">Action:</span> Create subtask from template "Onboarding" — parent + 9 nested subtasks, Task 6 dependent on Tasks 1–5 completing first</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">Manual template date fix</span>
+          <span class="badge manual">Manual</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Action:</span> Same pattern as Proposal — follow-up task + video walkthrough for whoever's running Won-day setup</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">"Ready for onboarding" notification</span>
+          <span class="badge zapier">Zapier</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Subtask "Identify immediate client contact" marked complete</div>
+          <div class="config-line"><span class="config-label">Action:</span> Post to Slack — free 2-step Zap</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">Client intake form updates task fields</span>
+          <span class="badge make">Make.com</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Client submits the ClickUp intake form</div>
+          <div class="config-line"><span class="config-label">Action:</span> Automatically writes submitted values onto the client's task fields</div>
+          <div class="config-line"><span class="config-label">Note:</span> Replaces the earlier "Link Task as related item" plan — Make.com handles the field match/update directly</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot open"></span>
+          <span class="step-name">Welcome Packet document</span>
+          <span class="badge manual">Unclear</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Open question:</span> Unsure whether "KINZA Client Document.docx" is the correct file to attach — needs confirming</div>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- STAGE 4 -->
+  <details class="stage">
+    <summary><span class="chevron">▸</span><span class="stage-title">Active (Billing)</span><span class="stage-meta">9 steps · 3 open, 1 pending</span></summary>
+    <div class="stage-body">
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot open"></span>
+          <span class="step-name">Confirm moved to Active</span>
+          <span class="badge manual">Unclear</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Open question:</span> How should this checkpoint fire — a Slack message, a task, something else? Not yet decided.</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot open"></span>
+          <span class="step-name">Calculate and pay referral fee (Track Two)</span>
+          <span class="badge manual">Open</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Blocker:</span> No confirmed system tells ClickUp when a payment lands — need to establish where payments are actually recorded first.</div>
+          <div class="config-line"><span class="config-label">Spec:</span> 10% of collected advisory fees only, excludes recruiting/PI/pass-through costs, due within 15 days of receipt.</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">Order and ship brownies + 2-day reminder</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Part of the 9-subtask Actively Billing template, due +5 days</div>
+          <div class="config-line"><span class="config-label">Reminder:</span> Native comment reminder if not checked off within 2 days — Slack version would need paid Zapier, so this stayed native</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot pending"></span>
+          <span class="step-name">Schedule onboarding meeting, if needed</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Part of the Actively Billing template, due +3 days, Founder/CEO</div>
+          <div class="config-line"><span class="config-label">Pending:</span> Exact "if needed" criteria — currently left to assignee judgment</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">Calendar dates, filing, filing audit</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> All three included in the Actively Billing template, due +3 / +5 / +6 days respectively</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot built"></span>
+          <span class="step-name">Identify client-specific track</span>
+          <span class="badge clickup">ClickUp</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Trigger:</span> Part of the Actively Billing template, due +2 days</div>
+          <div class="config-line"><span class="config-label">Note:</span> Should already be known from the proposal — this step just formalizes it in ClickUp</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot open"></span>
+          <span class="step-name">Confirm moved to Client Track</span>
+          <span class="badge manual">Blocked</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Blocker:</span> Client-Specific Track statuses (Leadership Reframe, HR-Recruiting, Exit by Design, etc.) aren't fully built yet — several still "not yet defined"</div>
+        </div>
+      </div>
+
+      <div class="step" onclick="this.classList.toggle('expanded')">
+        <div class="step-head">
+          <span class="status-dot open"></span>
+          <span class="step-name">No track match → ping Exec Ops Partner</span>
+          <span class="badge manual">Not built</span>
+          <span class="toggle-hint">tap for config</span>
+        </div>
+        <div class="config">
+          <div class="config-line"><span class="config-label">Requirement:</span> If a client doesn't match any existing track, something should notify Exec Ops Partner to bring it to the team — not yet built.</div>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <div class="side-triggers">
+    <div class="side-card">
+      <h3>Touch One — referral gift</h3>
+      <p>Fires independently of pipeline stage, not tied to any single stage above. The triggering event itself is still unclear and needs confirming with the team. Cost at volume flagged by Taryn as a concern needing recalibration.</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
