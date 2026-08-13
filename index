@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KINZA Internal Tools</title>
+<style>
+  :root {
+    --navy: #1e1c32;
+    --gold: #caa03a;
+    --body: #292929;
+    --paper: #fbf7f3;
+    --rose: #af7373;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
+    background: var(--paper);
+    color: var(--body);
+    margin: 0;
+    min-height: 100vh;
+  }
+  .header {
+    background: var(--navy);
+    padding: 2rem 2rem 1.5rem;
+    position: relative;
+  }
+  .header::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .wordmark {
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.28em;
+    color: var(--gold);
+  }
+  .header-sub {
+    font-size: 12px;
+    color: rgba(251,247,243,0.55);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  .intro { font-size: 14px; color: #5a5a5a; margin-bottom: 36px; max-width: 520px; }
+  .menu { display: grid; gap: 16px; }
+  .card {
+    display: block;
+    background: #fff;
+    border: 1px solid #e5ddc9;
+    border-radius: 10px;
+    padding: 24px 26px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease;
+  }
+  .card:hover { border-color: var(--gold); }
+  .card-title {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 17px;
+    color: var(--navy);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-desc { font-size: 13.5px; color: #666; line-height: 1.5; }
+  .arrow { color: var(--gold); font-size: 18px; }
+  .external-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--rose);
+    border: 1px solid var(--rose);
+    border-radius: 20px;
+    padding: 2px 8px;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="wordmark">K I N Z A</div>
+    <div class="header-sub">Internal Tools</div>
+  </div>
+
+  <div class="wrap">
+    <p class="intro">Reference tools for how the client pipeline actually runs, and how to file internal documents correctly. Both stay live and get updated as the systems evolve.</p>
+
+    <div class="menu">
+
+      <a class="card" href="pipeline.html">
+        <div class="card-title">Client Pipeline Automation Map <span class="arrow">→</span></div>
+        <div class="card-desc">Every stage from Qualified Lead through Active billing — what's built, what's still pending a decision, and exactly how each automation is configured.</div>
+      </a>
+
+      <a class="card" href="https://claude.ai/chat/45ac60b8-ce94-41e3-a03b-f9474b85e943" target="_blank" rel="noopener">
+        <div class="card-title">Filing Assistant <span class="arrow">↗</span></div>
+        <div class="card-desc">Describe, paste, or upload a document and get the correct HQ folder and filename back, following the Internal Folder Index &amp; Filing Guide.</div>
+        <span class="external-tag">Opens in Claude</span>
+      </a>
+
+    </div>
+  </div>
+
+</body>
+</html>
